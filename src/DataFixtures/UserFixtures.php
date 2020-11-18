@@ -29,36 +29,28 @@ class UserFixtures extends Fixture
     }
     public function load(ObjectManager $manager)
     {
-        for($i=1; $i<=4; $i++){
+        for($i=0; $i<4; $i++){
             
-            $tabprofil= $this->getReference(ProfilFixtures::getReferenceKey($i %4));
+            $tabprofil= $this->getReference(ProfilFixtures::getReferenceKey($i));
+           // dd($tabprofil->getLibelle());
             
-            foreach($tabprofil as $value){
+            for($j=0; $j<4; $j++){
 
                 $faker = Factory::create('fr_FR');
                 
 
                 $user = new User();
                 $passwordEncoder = $this->encoder->encodePassword($user, 'password');
-
-                if($value->getLibelle()== 'admin'){
+               /* if($tabprofil->getLibelle()== 'admin'){
                     $user = new User();
-                    $user->setPrenom($faker->firstName)
-                          ->setNom($faker->lastName)
-                          ->setEmail($faker->email)
-                          ->setPassword($passwordEncoder)
-                          ->setTelephone($faker->phonrNumber)
-                          ->setGenre($faker->randomElement(['masculin', 'feminin']))
-                          ->setArchivage(0)
-                          ->setProfil($value);
-
                         
 
-                }else if($value->getLibelle()== 'formateur'){
+                }else*/
+                 if($tabprofil->getLibelle()== 'formateur'){
                     
                     $user = new Formateur();
                     
-                }else if($value->getLibelle()== 'apprenant'){
+                }else if($tabprofil->getLibelle()== 'apprenant'){
 
                     $user = new Apprenant();
                     $user->setAdresse($faker->address)
@@ -70,6 +62,18 @@ class UserFixtures extends Fixture
                     $user = new CM();
                     
                 }
+                $user
+                    ->setUsername($faker->userName)
+                    ->setPassword($passwordEncoder)
+                    ->setNom($faker->lastName)
+                    ->setPrenom($faker->firstName)
+                    ->setTelephone($faker->phoneNumber)
+                    ->setGenre($faker->randomElement(['masculin', 'feminin']))
+                    ->setEmail($faker->email)
+                    ->setPhoto("default.png")
+                    ->setArchivage(0)
+                    ->setProfil($tabprofil);
+
                 $manager->persist($user);
 
                 $manager->flush();

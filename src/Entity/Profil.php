@@ -10,7 +10,28 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
- * @ApiResource()
+ * @ApiResource(
+ *      routePrefix="/admin",
+ *   itemOperations = {"GET","PUT","PATCH","DELETE":{
+ *      "method"="post",
+ *      "path"="/profils/{id}/archivage",
+ *      "controller"="App\Controller\ArchivageProfilMethodController",
+ *      "swagger_context"={
+ *          "summary"="Permet de faire la suppression d'un profil",
+ *          "description"="En réalité cela gère l'archivage"
+ *       }
+ *     }
+ *    },
+ *   attributes={
+ *      "pagination_items_per_page"=2
+ *   },
+ *   normalizationContext={
+ *      "groups"={"profil_read"}
+ *   },
+ *   subresourceOperations={
+ *      "users_get_subresource"={"patch"="/profils/{id}/users"}
+ *   }
+ * )
  */
 class Profil
 {

@@ -6,13 +6,61 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="profil", type="string")
  * @ORM\DiscriminatorMap({"admin" = "User", "apprenant" = "Apprenant", "formateur" = "Formateur", "cm" = "CM"})
- * @ApiResource()
+ * @UniqueEntity("email",message="Cet email existe déja")
+ * @UniqueEntity("username",message="Ce username existe déjà")
+ * @UniqueEntity("telephone",message="Ce numéro de téléphone existe déjà")
+ * @ApiResource(
+ *      attributes={
+ *             "pagination_enabled"=true,
+ *              "pagination_items_per_page"=2,
+ *              },
+ *   itemOperations={
+ *           "GET_user"={
+ *                 "method"="GET",
+ *                 "path"="/admin/users/{id}",
+ *                  "requirements"={"id"="\d+"},
+ *                  "security"="is_granted('ROLE_Administrateur')",
+ *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                  },
+ *             "ARCHIVER_user"={
+ *                      "method"="PUT",
+ *                      "path"="/admin/users/{id}Archivage",
+ *                      "controller"="App\Controller\API\ArchivageAdminController",
+ *                      "security"="is_granted('ROLE_Administrateur')",
+ *                      "security_message"="Vous n'avez pas access à cette Ressource"
+ *                    },
+ *               "EDITER_user"={
+ *                       "method"="PUT",
+ *                       "path"="/admin/users/{id}",
+ *                        "requirements"={"id"="\d+"},
+ *                        "security"="is_granted('ROLE_Administrateur')",
+ *                        "security_message"="Vous n'avez pas access à cette Ressource"
+ *                       },
+ *                    },
+ *         collectionOperations={
+ *                 "AJOUTER_user"={
+ *                        "method"="POST",
+ *                        "path"="/admin/users",
+ *                        "security_post_denormalize"="is_granted('ROLE_Administrateur')",
+ *                        "security_post_denormalize_message"="Vous n'avez pas access à cette Ressource",
+ *                        },
+ *                 "LISTER_users"={
+ *                        "method"="GET",
+ *                         "path"="/admin/users",
+ *                         "security"="is_granted('ROLE_Administrateur')",
+ *                         "security_message"="Vous n'avez pas access à cette Ressource"
+ *                             },
+ *            },
+ *  normalizationContext={"groups"={"user:read"}},
+ * )
  */
 class User implements UserInterface
 {
@@ -25,6 +73,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
      */
     private $username;
 
@@ -36,16 +85,19 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Assert\NotBlank(message="Ce champ est obligatoire")
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Assert\NotBlank(message="Veuillez renseigner le nom de l'utilisateur")
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Assert\NotBlank(message="Veuillez renseigner le prénom de l'utilisateur")
      */
     private $prenom;
 
@@ -56,6 +108,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=15)
+     * @Assert\NotBlank(message="Veuillez renseigner le sexe de l'utilisateur")
      */
     private $genre;
 
