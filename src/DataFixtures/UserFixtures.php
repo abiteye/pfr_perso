@@ -41,12 +41,11 @@ class UserFixtures extends Fixture
 
                 $user = new User();
                 $passwordEncoder = $this->encoder->encodePassword($user, 'password');
-               /* if($tabprofil->getLibelle()== 'admin'){
+                if($tabprofil->getLibelle()== 'admin'){
                     $user = new User();
                         
 
-                }else*/
-                 if($tabprofil->getLibelle()== 'formateur'){
+                }else if($tabprofil->getLibelle()== 'formateur'){
                     
                     $user = new Formateur();
                     

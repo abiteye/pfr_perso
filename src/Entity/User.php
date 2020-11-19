@@ -5,9 +5,10 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -59,7 +60,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  *                         "security_message"="Vous n'avez pas access à cette Ressource"
  *                             },
  *            },
- *  normalizationContext={"groups"={"user:read"}},
+ *  normalizationContext={
+ *      "groups"={"users_read"}
+ *  },
  * )
  */
 class User implements UserInterface
@@ -68,18 +71,18 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"users_read"})
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank(message="Ce champ est obligatoire")
+     * @Groups({"users_read"})
      */
     private $username;
 
-    /**
-     * @ORM\Column(type="json")
-     */
+
     private $roles = [];
 
     /**
@@ -92,12 +95,14 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le nom de l'utilisateur")
+     * @Groups({"users_read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le prénom de l'utilisateur")
+     * @Groups({"users_read"})
      */
     private $prenom;
 
@@ -129,6 +134,9 @@ class User implements UserInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="user")
+     * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank(message="Veuillez renseigner le profil de l'utilisateur")
+     * @Groups({"user_read"})
      */
     private $profil;
 
@@ -161,7 +169,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = 'ROLE_'.$this->profil->getLibelle();
 
         return array_unique($roles);
     }
