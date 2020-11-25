@@ -41,15 +41,15 @@ class UserFixtures extends Fixture
 
                 $user = new User();
                 $passwordEncoder = $this->encoder->encodePassword($user, 'password');
-                if($tabprofil->getLibelle()== 'admin'){
+                if($tabprofil->getLibelle()== 'Admin'){
                     $user = new User();
                         
 
-                }else if($tabprofil->getLibelle()== 'formateur'){
+                }else if($tabprofil->getLibelle()== 'Formateur'){
                     
                     $user = new Formateur();
                     
-                }else if($tabprofil->getLibelle()== 'apprenant'){
+                }else if($tabprofil->getLibelle()== 'Apprenant'){
 
                     $user = new Apprenant();
                     $user->setAdresse($faker->address)
@@ -69,7 +69,7 @@ class UserFixtures extends Fixture
                     ->setTelephone($faker->phoneNumber)
                     ->setGenre($faker->randomElement(['masculin', 'feminin']))
                     ->setEmail($faker->email)
-                    ->setPhoto("default.png")
+                    ->setPhoto($faker->imageUrl($width = '640', $height = '480'))
                     ->setArchivage(0)
                     ->setProfil($tabprofil);
 

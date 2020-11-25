@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\NumericFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -19,51 +22,44 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @UniqueEntity("username",message="Ce username existe déjà")
  * @UniqueEntity("telephone",message="Ce numéro de téléphone existe déjà")
  * @ApiResource(
- *      attributes={
- *             "pagination_enabled"=true,
- *              "pagination_items_per_page"=2,
- *              },
- *   itemOperations={
+ *      routePrefix="/admin",
+ *        itemOperations={
  *           "GET_user"={
  *                 "method"="GET",
- *                 "path"="/admin/users/{id}",
- *                  "requirements"={"id"="\d+"},
- *                  "security"="is_granted('ROLE_Administrateur')",
- *                  "security_message"="Vous n'avez pas access à cette Ressource"
+ *                 "defaults"={"id"=null},
+ *                 "path"="/users/{id}",
+ *                 "requirements"={"id"="\d+"},
+ *                 "security"="is_granted('ROLE_Admin')",
+ *                 "security_message"="Vous n'avez pas access à cette Ressource"
  *                  },
- *             "ARCHIVER_user"={
- *                      "method"="PUT",
- *                      "path"="/admin/users/{id}Archivage",
- *                      "controller"="App\Controller\API\ArchivageAdminController",
- *                      "security"="is_granted('ROLE_Administrateur')",
- *                      "security_message"="Vous n'avez pas access à cette Ressource"
- *                    },
  *               "EDITER_user"={
  *                       "method"="PUT",
- *                       "path"="/admin/users/{id}",
- *                        "requirements"={"id"="\d+"},
- *                        "security"="is_granted('ROLE_Administrateur')",
+ *                       "path"="/users/{id}",
+ *                       "requirements"={"id"="\d+"},
+ *                        "security"="is_granted('ROLE_Admin')",
  *                        "security_message"="Vous n'avez pas access à cette Ressource"
  *                       },
  *                    },
- *         collectionOperations={
- *                 "AJOUTER_user"={
+ *        collectionOperations={
+ *                 "addUser"={
  *                        "method"="POST",
- *                        "path"="/admin/users",
- *                        "security_post_denormalize"="is_granted('ROLE_Administrateur')",
+ *                        "path"="/users",
+ *                        "controller"=App\Controller\AddUserController::class,
+ *                        "security_post_denormalize"="is_granted('ROLE_Admin')",
  *                        "security_post_denormalize_message"="Vous n'avez pas access à cette Ressource",
  *                        },
  *                 "LISTER_users"={
  *                        "method"="GET",
- *                         "path"="/admin/users",
- *                         "security"="is_granted('ROLE_Administrateur')",
+ *                         "path"="/users",
+ *                         "security"="is_granted('ROLE_Admin')",
  *                         "security_message"="Vous n'avez pas access à cette Ressource"
- *                             },
+ *                   },
  *            },
  *  normalizationContext={
  *      "groups"={"users_read"}
  *  },
  * )
+ * @ApiFilter(NumericFilter::class, properties={"archivage"})
  */
 class User implements UserInterface
 {
@@ -78,7 +74,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank(message="Ce champ est obligatoire")
-     * @Groups({"users_read"})
+     * @Groups({"users_read", "profil_read", "users_subresource"})
      */
     private $username;
 
@@ -95,19 +91,20 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le nom de l'utilisateur")
-     * @Groups({"users_read"})
+     * @Groups({"users_read", "profil_read", "users_subresource"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le prénom de l'utilisateur")
-     * @Groups({"users_read"})
+     * @Groups({"users_read", "profil_read", "users_subresource"})
      */
     private $prenom;
 
     /**
      * @ORM\Column(type="string", length=100)
+     * @Groups({"users_read", "profil_read", "users_subresource"})
      */
     private $telephone;
 
@@ -119,11 +116,13 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Veuillez renseigner l'email de l'utilisateur")
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=20)
+     * @ORM\Column(type="blob", nullable=true)
+     * @Assert\NotBlank(message="Ajouter une photo pour l'utilisateur")
      */
     private $photo;
 
@@ -136,7 +135,6 @@ class User implements UserInterface
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="user")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotBlank(message="Veuillez renseigner le profil de l'utilisateur")
-     * @Groups({"user_read"})
      */
     private $profil;
 
@@ -273,12 +271,23 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getPhoto(): ?string
+    public function getPhoto()
     {
-        return $this->photo;
+        if($this->photo){
+            $data = stream_get_contents($this->photo);
+            if(!$this->photo){
+                fclose($this->photo);
+            }
+
+            return base64_encode($data);
+
+        }else{
+            
+            return null;
+        }
     }
 
-    public function setPhoto(string $photo): self
+    public function setPhoto($photo): self
     {
         $this->photo = $photo;
 

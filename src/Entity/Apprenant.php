@@ -2,11 +2,45 @@
 
 namespace App\Entity;
 
-use App\Repository\ApprenantRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ApprenantRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
  * @ORM\Entity(repositoryClass=ApprenantRepository::class)
+ * @ApiResource(
+ *      collectionOperations={
+ *          "LISTER_apprenants"={
+ *                        "method"="GET",
+ *                         "path"="/apprenants",
+ *                         "security"="is_granted('ROLE_Formateur')",
+ *                         "security_message"="Vous n'avez pas access à cette Ressource"
+ *                   },
+ *          "addApprenant"={
+ *                        "method"="POST",
+ *                        "path"="/apprenants",
+ *                        "controller"=App\Controller\AddUserController::class,
+ *                        "security_post_denormalize"="is_granted('ROLE_Formateur')",
+ *                        "security_post_denormalize_message"="Vous n'avez pas access à cette Ressource",
+ *           },
+ *      },
+ *      itemOperations={
+ *          "GET_apprenant"={
+ *                 "method"="GET",
+ *                 "path"="/apprenants/{id}",
+ *                 "requirements"={"id"="\d+"},
+ *                 "security"="is_granted('ROLE_Formateur') or is_granted('ROLE_Apprenant') or is_granted('ROLE_Cm')",
+ *                 "security_message"="Vous n'avez pas access à cette Ressource"
+ *           },
+ *          "PUT_apprenant"={
+ *                 "method"="PUT",
+ *                 "path"="/apprenants/{id}",
+ *                 "requirements"={"id"="\d+"},
+ *                 "security"="is_granted('ROLE_Formateur')",
+ *                 "security_message"="Vous n'avez pas access à cette Ressource"
+ *           },
+ *    }
+ * )
  */
 class Apprenant extends User
 {

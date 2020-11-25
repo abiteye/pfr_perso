@@ -15,7 +15,7 @@ class ProfilFixtures extends Fixture
     }
     public function load(ObjectManager $manager)
     {
-        $tab=['admin', 'formateur', 'apprenant', 'cm'];
+        $tab=['Admin', 'Formateur', 'Apprenant', 'Cm'];
         foreach($tab as $key => $value){
             
             $profil = new Profil();

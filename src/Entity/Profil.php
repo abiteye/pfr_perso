@@ -5,21 +5,24 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProfilRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\NumericFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
- * @UniqueEntity("username",message="Ce username existe déjà")
+ * @UniqueEntity("libelle",message="Ce libellé existe déjà")
+ * @ApiFilter(NumericFilter::class, properties={"archivage"})
  * @ApiResource(
  *      routePrefix="/admin",
  *   itemOperations = {"GET","PUT","DELETE":{
  *      "path"="/profils/{id}",
- *      "controller"="App\Controller\ArchivageProfilController",
  *      "swagger_context"={
  *          "summary"="Permet de faire la suppression d'un profil",
  *          "description"="En réalité cela gère l'archivage"
@@ -41,12 +44,15 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *        }
  *      
  *   },
- *   attributes={
- *      "pagination_items_per_page"=2
- *   },
  *   normalizationContext={
- *      "groups"={"profil_read"}
- *   }
+ *      "groups"=
+ *          {"profil_read"}
+ *   },
+ * subresourceOperations={
+ *          "users_get_subresource"={
+ *              "patch"="/profils/{id}/users"
+ *            }
+ *      }
  *   
  * )
  */
@@ -56,6 +62,7 @@ class Profil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"profil_read"})
      */
     private $id;
 
@@ -86,6 +93,7 @@ class Profil
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
      * @Groups({"profil_read"})
+     * @ApiSubresource()
      */
     private $user;
 
