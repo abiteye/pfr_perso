@@ -115,21 +115,21 @@ class AddUserController extends AbstractController
     }
 
     /**
-     * @Route(
+     * * @Route(
      *     name="modifyUser",
      *     path="/api/admin/users/{id}",
-     *     methods={"PUT"}
-     * ),
-     * @Route(
-     *     name="modofyApprenant",
+     *     methods={"PUT"},
+     * 
+     * ),* @Route(
+     *     name="modifyApprenant",
      *     path="/api/apprenants/{id}",
-     *     methods={"PUT}
-     * ),
-     * @Route(
+     *     methods={"PUT"},
+     * 
+     * ),* @Route(
      *     name="modifyFormateur",
-     *     path="/api/formateurs/{id},
-     *     methods={"PUT"}
-     * )
+     *     path="/api/formateurs/{id}",
+     *     methods={"PUT"},
+     * ),
     */
 
     public function updateUser(Request $request, int $id){

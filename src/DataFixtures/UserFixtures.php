@@ -10,6 +10,7 @@ use App\Entity\Formateur;
 use App\DataFixtures\ProfilFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use App\DataFixtures\ProfilDeSortieFixtures;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserFixtures extends Fixture
@@ -29,6 +30,8 @@ class UserFixtures extends Fixture
     }
     public function load(ObjectManager $manager)
     {
+        $faker = Factory::create('fr_FR');
+
         for($i=0; $i<4; $i++){
             
             $tabprofil= $this->getReference(ProfilFixtures::getReferenceKey($i));
@@ -36,7 +39,6 @@ class UserFixtures extends Fixture
             
             for($j=0; $j<4; $j++){
 
-                $faker = Factory::create('fr_FR');
                 
 
                 $user = new User();
@@ -48,14 +50,18 @@ class UserFixtures extends Fixture
                 }else if($tabprofil->getLibelle()== 'Formateur'){
                     
                     $user = new Formateur();
+
                     
                 }else if($tabprofil->getLibelle()== 'Apprenant'){
+
+                    $key=$faker->numberBetween(0,7);
 
                     $user = new Apprenant();
                     $user->setAdresse($faker->address)
                          ->setStatut($faker->randomElement(['Actif', 'Renvoyé', 'Suspendu', 'Abandonné', 'Décédé']))
                          ->setInfoComplementaire($faker->text())
-                         ->setCategorie($faker->randomElement(['BIEN', 'ABIEN', 'EXCELLENT', 'FAIBLE'])); 
+                         ->setCategorie($faker->randomElement(['BIEN', 'ABIEN', 'EXCELLENT', 'FAIBLE']))
+                         ->setProfilDeSortie($this->getReference(ProfilDeSortieFixtures::getReferenceKey($key))); 
                     
                 }else{
                     $user = new CM();

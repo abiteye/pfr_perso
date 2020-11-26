@@ -34,10 +34,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *              "method"="GET",
  *              "path"="/profils"       
  *        },
- *       "Lister_user_profil"={
- *              "method"="GET",
- *              "path"="/profils/{id}/users"
- *        },
+ *     
  *       "Ajouter_profil"={
  *              "method"="POST",
  *              "path"="/profils"
@@ -47,12 +44,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *   normalizationContext={
  *      "groups"=
  *          {"profil_read"}
- *   },
- * subresourceOperations={
- *          "users_get_subresource"={
- *              "patch"="/profils/{id}/users"
- *            }
- *      }
+ *   }
  *   
  * )
  */
