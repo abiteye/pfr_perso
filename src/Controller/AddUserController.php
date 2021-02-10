@@ -130,7 +130,7 @@ class AddUserController extends AbstractController
      *     path="/api/formateurs/{id}",
      *     methods={"PUT"},
      * ),
-    */
+     */
 
     public function updateUser(Request $request, int $id){
 

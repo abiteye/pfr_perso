@@ -91,14 +91,14 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le nom de l'utilisateur")
-     * @Groups({"users_read", "profil_read", "users_subresource"})
+     * @Groups({"users_read", "profil_read", "users_subresource", "groupe_read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank(message="Veuillez renseigner le prénom de l'utilisateur")
-     * @Groups({"users_read", "profil_read", "users_subresource"})
+     * @Groups({"users_read", "profil_read", "users_subresource", "groupe_read"})
      */
     private $prenom;
 
@@ -117,6 +117,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Veuillez renseigner l'email de l'utilisateur")
+     * @Groups({"users_read", "profil_read", "users_subresource", "groupe_read"})
      */
     private $email;
 

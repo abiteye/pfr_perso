@@ -4,7 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ApprenantRepository;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=ApprenantRepository::class)
@@ -39,7 +42,10 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *                 "security"="is_granted('ROLE_Formateur')",
  *                 "security_message"="Vous n'avez pas access à cette Ressource"
  *           },
- *    }
+ *    },
+ *      normalizationContext = {
+ *          "groups"={"apprenant_read", "groupe_read"}
+ *      }
  * )
  */
 class Apprenant extends User
@@ -58,6 +64,7 @@ class Apprenant extends User
 
     /**
      * @ORM\Column(type="string", length=20)
+     * @Groups({"apprenant_read", "promo_read"})
      */
     private $statut;
 
@@ -75,6 +82,17 @@ class Apprenant extends User
      * @ORM\ManyToOne(targetEntity=ProfilDeSortie::class, inversedBy="apprenants")
      */
     private $profilDeSortie;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Groupe::class, mappedBy="apprenants")
+     * @Groups({"apprenant_read", "promo_read"})
+     */
+    private $groupes;
+
+    public function __construct()
+    {
+        $this->groupes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -137,6 +155,33 @@ class Apprenant extends User
     public function setProfilDeSortie(?ProfilDeSortie $profilDeSortie): self
     {
         $this->profilDeSortie = $profilDeSortie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Groupe[]
+     */
+    public function getGroupes(): Collection
+    {
+        return $this->groupes;
+    }
+
+    public function addGroupe(Groupe $groupe): self
+    {
+        if (!$this->groupes->contains($groupe)) {
+            $this->groupes[] = $groupe;
+            $groupe->addApprenant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupe(Groupe $groupe): self
+    {
+        if ($this->groupes->removeElement($groupe)) {
+            $groupe->removeApprenant($this);
+        }
 
         return $this;
     }

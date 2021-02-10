@@ -11,9 +11,10 @@ use App\DataFixtures\ProfilFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use App\DataFixtures\ProfilDeSortieFixtures;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class UserFixtures extends Fixture
+class UserFixtures extends Fixture implements DependentFixtureInterface
 {
     private $encoder;
     public function __construct(UserPasswordEncoderInterface $encoder)
@@ -31,39 +32,44 @@ class UserFixtures extends Fixture
     public function load(ObjectManager $manager)
     {
         $faker = Factory::create('fr_FR');
-
-        for($i=0; $i<4; $i++){
+        $tabprofil=['Admin',"Formateur","Cm"];
+        foreach($tabprofil as $profil){
             
-            $tabprofil= $this->getReference(ProfilFixtures::getReferenceKey($i));
            // dd($tabprofil->getLibelle());
             
-            for($j=0; $j<4; $j++){
+            for($j=0; $j<8; $j++){
 
                 
 
                 $user = new User();
                 $passwordEncoder = $this->encoder->encodePassword($user, 'password');
-                if($tabprofil->getLibelle()== 'Admin'){
+                if($profil== 'Admin'){
+                    $tabprofil= $this->getReference(ProfilFixtures::ADMIN_USER_REFERENCE);
                     $user = new User();
                         
 
-                }else if($tabprofil->getLibelle()== 'Formateur'){
+                }else if($profil== 'Formateur'){
                     
-                    $user = new Formateur();
+                     $tabprofil= $this->getReference(ProfilFixtures::FOR_USER_REFERENCE);
+                     
+                     $user = new Formateur();
 
                     
-                }else if($tabprofil->getLibelle()== 'Apprenant'){
+                }
+                //else if($tabprofil->getLibelle()== 'Apprenant'){
 
-                    $key=$faker->numberBetween(0,7);
+                //     $key=$faker->numberBetween(0,7);
 
-                    $user = new Apprenant();
-                    $user->setAdresse($faker->address)
-                         ->setStatut($faker->randomElement(['Actif', 'Renvoyé', 'Suspendu', 'Abandonné', 'Décédé']))
-                         ->setInfoComplementaire($faker->text())
-                         ->setCategorie($faker->randomElement(['BIEN', 'ABIEN', 'EXCELLENT', 'FAIBLE']))
-                         ->setProfilDeSortie($this->getReference(ProfilDeSortieFixtures::getReferenceKey($key))); 
+                //     $user = new Apprenant();
+                //     $user->setAdresse($faker->address)
+                //          ->setStatut($faker->randomElement(['Actif', 'Renvoyé', 'Suspendu', 'Abandonné', 'Décédé']))
+                //          ->setInfoComplementaire($faker->text())
+                //          ->setCategorie($faker->randomElement(['BIEN', 'ABIEN', 'EXCELLENT', 'FAIBLE']))
+                //          ->setProfilDeSortie($this->getReference(ProfilDeSortieFixtures::getReferenceKey($key))); 
                     
-                }else{
+                // }
+                else{
+                    $tabprofil= $this->getReference(ProfilFixtures::CM_USER_REFERENCE);
                     $user = new CM();
                     
                 }
